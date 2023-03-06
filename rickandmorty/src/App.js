@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Character from "./Character";
+import "./index.css";
 
-const App = () => {
+function App() {
   const [characters, setCharacters] = useState([]);
+  const [nextUrl, setNextUrl] = useState(null);
+  const [prevUrl, setPrevUrl] = useState(null);
 
-  useEffect(() => {
-    const fetchCharacters = async () => {
-      const response = await fetch(
-        "https://rickandmortyapi.com/api/character"
-      );
+  const fetchCharacters = async (url = "https://rickandmortyapi.com/api/character") => {
+    try {
+      const response = await fetch(url);
       const data = await response.json();
       setCharacters(data.results);
-    };
+      setNextUrl(data.info.next);
+      setPrevUrl(data.info.prev);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
     fetchCharacters();
   }, []);
 
@@ -23,8 +31,16 @@ const App = () => {
           <Character key={character.id} character={character} />
         ))}
       </div>
+      <div className="pagination">
+        <button onClick={() => fetchCharacters(prevUrl)} disabled={!prevUrl}>
+          Previous Page
+        </button>
+        <button onClick={() => fetchCharacters(nextUrl)} disabled={!nextUrl}>
+          Next Page
+        </button>
+      </div>
     </div>
   );
-};
+}
 
 export default App;
